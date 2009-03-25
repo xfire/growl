@@ -304,6 +304,8 @@ class Site(Config):
 
 
 def templateFilter(func):
+    """ decorator to easily create jinja2 filters
+    """
     jinja2.Template('').environment.filters[func.__name__] = func
 
 
