@@ -30,6 +30,7 @@ import sys
 import re
 import shutil
 import datetime
+import collections
 
 import yaml
 import jinja2
@@ -302,6 +303,21 @@ class Site(Config):
                         os.makedirs(path)
                     shutil.copy(os.path.join(root, f), os.path.join(path, f))
 
+    def serve(self, port):
+        """ serve the deploy directory with an very simple, cgi
+            capable web server on 0.0.0.0:<port>.
+        """
+        from BaseHTTPServer import HTTPServer
+        from CGIHTTPServer import CGIHTTPRequestHandler
+        os.chdir(self.DEPLOY_DIR)
+        httpd = HTTPServer(('', int(port)), CGIHTTPRequestHandler)
+        sa = httpd.socket.getsockname()
+        print "Serving HTTP on", sa[0], "port", sa[1], "..."
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            pass
+
 
 def templateFilter(func):
     """ decorator to easily create jinja2 filters
@@ -310,18 +326,36 @@ def templateFilter(func):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        print 'syntax: %s <from> [to]' % sys.argv[0]
+    args = collections.deque(sys.argv[1:])
+
+    serve = base = deploy = None
+    while args and args[0].startswith('--'):
+        arg = args.popleft()
+        if arg.startswith('--serve'):
+            serve = arg
+
+    if args:
+        base = args.popleft()
+    else:
+        print 'syntax: %s [options] <from> [to]\n' % sys.argv[0]
+        print 'Options:'
+        print '  --serve[:port]   Start web server (default port 8000)\n'
         sys.exit(1)
-    if len(sys.argv) >= 2:
-        base = sys.argv[1]
-    if len(sys.argv) >= 3:
-        deploy = sys.argv[2]
+
+    if args:
+        deploy = args.popleft()
     else:
         deploy = os.path.join(base, '_deploy')
+
 
     site = Site(base, deploy)
 
     site.read()
     site.generate()
     site.deploy()
+
+    if serve:
+        port = 8000
+        if ':' in serve:
+            serve, port = serve.split(':', 1)
+        site.serve(port)
