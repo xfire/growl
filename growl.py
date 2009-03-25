@@ -265,17 +265,28 @@ class Site(Config):
         for p in self.posts:
             p.write()
 
+    IGNORE = ('_', '.')
+
     def write_site_content(self):
+        """ copy site content to deploy directory.
+
+            ignoring all files and directories, which first
+            character is in IGNORE.
+
+            files which end with an underscore are processed
+            with the Page class and the underscrore is
+            stripped from the output filename.
+        """
         for root, dirs, files in os.walk(self.BASE_DIR):
             base = root.replace(self.BASE_DIR, '')
 
-            for d in dirs:
-                nd = os.path.join(self.DEPLOY_DIR, base, d)
-                if not d.startswith('_') and not os.path.isdir(nd):
-                    os.makedirs(nd)
-            dirs[:] = [d for d in dirs if not d.startswith('_')]
+            for d in [d for d in dirs if not d[0] in Site.IGNORE]:
+                    nd = os.path.join(self.DEPLOY_DIR, base, d)
+                    if not os.path.isdir(nd):
+                        os.makedirs(nd)
+            dirs[:] = [d for d in dirs if not d[0] in Site.IGNORE]
 
-            for f in files:
+            for f in [f for f in files if not f[0] in Site.IGNORE]:
                 if f.endswith('_'):
                     Page(self.BASE_DIR,
                          self.DEPLOY_DIR,
