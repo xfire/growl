@@ -203,17 +203,20 @@ class Post(Template):
 
 class Site(Config):
 
+    CONTEXT = AttrDict()
+
     def __init__(self, base, deploy):
         super(Site, self).__init__(base, deploy)
-
-        self.context = AttrDict()
-        self.context.site = AttrDict()
-        self.context.site.time = datetime.datetime.now()
 
         if not self.LIB_DIR in sys.path:
             sys.path.append(self.LIB_DIR)
 
         self.hooks()
+
+        self.context = Site.CONTEXT.copy()
+        if not 'site' in self.context:
+            self.context.site = AttrDict()
+        self.context.site.time = datetime.datetime.now()
 
     def hooks(self):
         for f in sorted(os.listdir(self.HOOK_DIR)):
