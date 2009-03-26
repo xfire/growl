@@ -184,7 +184,7 @@ class Post(Page):
             del self.context['category']
         if 'categories' in self.context:
             del self.context['categories']
-        self.context.categories = [c.strip() for c in cats.split(',') if c]
+        self.categories = [c.strip() for c in cats.split(',') if c]
 
     @property
     def date(self):
@@ -357,7 +357,6 @@ if __name__ == '__main__':
         deploy = args.popleft()
     else:
         deploy = os.path.join(base, '_deploy')
-
 
     site = Site(base, deploy)
 
