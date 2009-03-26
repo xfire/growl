@@ -73,17 +73,17 @@ class Template(Config):
         self.read_yaml()
 
     def read_yaml(self):
-        self.content = file(self.filename, 'r').read()
+        self._content = file(self.filename, 'r').read()
 
-        mo = self.RE_YAML.match(self.content)
+        mo = self.RE_YAML.match(self._content)
         if mo and mo.groupdict().get('yaml'):
             self.context.update(yaml.load(mo.groupdict().get('yaml')))
-            self.content = mo.groupdict().get('content')
+            self._content = mo.groupdict().get('content')
 
     def transform(self):
         ext = os.path.splitext(self.filename)[-1][1:]
         t = self.transformers.get(ext, lambda x: x)
-        return t(self.content)
+        return t(self._content)
 
     def render(self):
         ctx = self.context.copy()
