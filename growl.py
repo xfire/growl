@@ -143,14 +143,30 @@ class Layout(Template):
 
 class Page(Template):
 
-    def write(self):
+    def __init__(self, base, deploy, filename, layout, context):
+        super(Page, self).__init__(base, deploy, filename, layout, context)
+
+        self.context.page = self
+
+    @property
+    def url(self):
+        return self.path.replace(os.path.sep, '/')
+
+    @property
+    def path(self):
         path = os.path.abspath(self.filename)[:-1]
         path = path.replace(os.path.abspath(self.BASE_DIR), '', 1)
-        path = path.lstrip(os.path.sep)
-        return super(Page, self).write(path, self.layout())
+        return path.lstrip(os.path.sep)
+
+    @property
+    def content(self):
+        return self.render()
+
+    def write(self):
+        return super(Page, self).write(self.path, self.layout())
 
 
-class Post(Template):
+class Post(Page):
 
     def __init__(self, base, deploy, filename, layout, context):
         super(Post, self).__init__(base, deploy, filename, layout, context)
@@ -160,9 +176,7 @@ class Post(Template):
 
         self.year, self.month, self.day, self.slug = ext[0].split('-', 3)
 
-        self.context.date = self.date
-        self.context.url = self.url
-        self.context.path = self.path
+        self.context.post = self
 
         cats = ','.join((self.context.get('category', ''),
                          self.context.get('categories', '')))
@@ -184,21 +198,16 @@ class Post(Template):
 
     @property
     def url(self):
-        return '/'.join((self.path, self.slug))
+        return self.path
 
     @property
     def path(self):
-        return os.path.join(self.year, self.month, self.day)
+        return os.path.join(self.year, self.month, self.day,
+                            self.slug, 'index.xhtml')
 
     @property
-    def categories(self):
-        return self.context.get('categories')
-
-    def write(self):
-        return super(Post, self).write(os.path.join(self.path,
-                                                    self.slug,
-                                                    'index.html'),
-                                       self.layout())
+    def content(self):
+        return self.render()
 
     def __cmp__(self, other):
         return cmp(self.date, other.date)
