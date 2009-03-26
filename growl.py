@@ -132,11 +132,13 @@ class Layout(Template):
         ext = os.path.splitext(base)
         self.name = ext[0]
 
-        self.content = self.transform()
-
     @property
     def layout(self):
         return self.context.get('layout')
+
+    @property
+    def content(self):
+        return self.transform()
 
 
 class Page(Template):
