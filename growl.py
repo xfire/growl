@@ -31,6 +31,8 @@ import re
 import shutil
 import datetime
 import collections
+import itertools
+import functools
 
 import yaml
 
@@ -295,23 +297,31 @@ class Site(Config):
     def write_site_content(self):
         """ copy site content to deploy directory.
 
-            ignoring all files and directories, which first
-            character is in IGNORE.
+            ignoring all files and directories, if their filename
+            begins with a token defined in IGNORE.
 
             files which end with an underscore are processed
             with the Page class and the underscrore is
             stripped from the output filename.
         """
+        def ignore_filter(item):
+            for ign in self.IGNORE:
+                if item.startswith(ign):
+                    return False
+            return True
+
+        ignore = functools.partial(itertools.ifilter, ignore_filter)
+
         for root, dirs, files in os.walk(self.BASE_DIR):
             base = root.replace(self.BASE_DIR, '')
 
-            for d in [d for d in dirs if not d[0] in Site.IGNORE]:
+            for d in ignore(dirs):
                     nd = os.path.join(self.DEPLOY_DIR, base, d)
                     if not os.path.isdir(nd):
                         os.makedirs(nd)
-            dirs[:] = [d for d in dirs if not d[0] in Site.IGNORE]
+            dirs[:] = ignore(dirs)
 
-            for f in [f for f in files if not f[0] in Site.IGNORE]:
+            for f in ignore(files):
                 if f.endswith('_'):
                     Page(os.path.join(root, f),
                          self.layouts,
