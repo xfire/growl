@@ -65,15 +65,16 @@ class AttrDict(dict):
 
 
 class Config(object):
-    transformers = {}
 
-    def __init__(self, base, deploy):
-        self.BASE_DIR = base
-        self.DEPLOY_DIR = deploy
-        self.LAYOUT_DIR = os.path.join(base, '_layout')
-        self.POST_DIR = os.path.join(base, '_posts')
-        self.HOOK_DIR = os.path.join(base, '_hooks')
-        self.LIB_DIR = os.path.join(base, '_libs')
+    @classmethod
+    def updateconfig(cls, base, deploy):
+        cls.transformers = {}
+        cls.BASE_DIR = base
+        cls.DEPLOY_DIR = deploy
+        cls.LAYOUT_DIR = os.path.join(base, '_layout')
+        cls.POST_DIR = os.path.join(base, '_posts')
+        cls.HOOK_DIR = os.path.join(base, '_hooks')
+        cls.LIB_DIR = os.path.join(base, '_libs')
 
 
 class Template(Config):
@@ -81,8 +82,8 @@ class Template(Config):
     RE_YAML = re.compile(r'(^---\s*$(?P<yaml>.*?)^---\s*$)?(?P<content>.*)',
                          re.M | re.S)
 
-    def __init__(self, base, deploy, filename, layouts, context):
-        super(Template, self).__init__(base, deploy)
+    def __init__(self, filename, layouts, context):
+        super(Template, self).__init__()
         self.filename = filename
         self.layouts = layouts
         self.context = context.copy()
@@ -141,8 +142,8 @@ class Template(Config):
 
 class Layout(Template):
 
-    def __init__(self, base, deploy, filename, context):
-        super(Layout, self).__init__(base, deploy, filename, {}, context)
+    def __init__(self, filename, context):
+        super(Layout, self).__init__(filename, {}, context)
 
         base = os.path.basename(filename)
         ext = os.path.splitext(base)
@@ -159,8 +160,8 @@ class Layout(Template):
 
 class Page(Template):
 
-    def __init__(self, base, deploy, filename, layout, context):
-        super(Page, self).__init__(base, deploy, filename, layout, context)
+    def __init__(self, filename, layout, context):
+        super(Page, self).__init__(filename, layout, context)
 
         self.context.page = self
 
@@ -184,8 +185,8 @@ class Page(Template):
 
 class Post(Page):
 
-    def __init__(self, base, deploy, filename, layout, context):
-        super(Post, self).__init__(base, deploy, filename, layout, context)
+    def __init__(self, filename, layout, context):
+        super(Post, self).__init__(filename, layout, context)
 
         base = os.path.basename(filename)
         ext = os.path.splitext(base)
@@ -233,8 +234,8 @@ class Site(Config):
 
     CONTEXT = AttrDict()
 
-    def __init__(self, base, deploy):
-        super(Site, self).__init__(base, deploy)
+    def __init__(self):
+        super(Site, self).__init__()
 
         if not self.LIB_DIR in sys.path:
             sys.path.append(self.LIB_DIR)
@@ -264,18 +265,14 @@ class Site(Config):
         pass
 
     def read_layouts(self):
-        self.layouts = [Layout(self.BASE_DIR,
-                               self.DEPLOY_DIR,
-                               os.path.join(self.LAYOUT_DIR, f),
+        self.layouts = [Layout(os.path.join(self.LAYOUT_DIR, f),
                                self.context)
                             for f in os.listdir(self.LAYOUT_DIR)
                                 if not f.startswith('__')]
         self.layouts = dict((l.name, l) for l in self.layouts)
 
     def read_posts(self):
-        self.posts = [Post(self.BASE_DIR,
-                           self.DEPLOY_DIR,
-                           os.path.join(self.POST_DIR, f),
+        self.posts = [Post(os.path.join(self.POST_DIR, f),
                            self.layouts,
                            self.context)
                           for f in os.listdir(self.POST_DIR)
@@ -316,9 +313,7 @@ class Site(Config):
 
             for f in [f for f in files if not f[0] in Site.IGNORE]:
                 if f.endswith('_'):
-                    Page(self.BASE_DIR,
-                         self.DEPLOY_DIR,
-                         os.path.join(root, f),
+                    Page(os.path.join(root, f),
                          self.layouts,
                          self.context).write()
                 else:
@@ -368,7 +363,8 @@ if __name__ == '__main__':
     else:
         deploy = os.path.join(base, '_deploy')
 
-    site = Site(base, deploy)
+    Config.updateconfig(base, deploy)
+    site = Site()
 
     site.read()
     site.generate()
