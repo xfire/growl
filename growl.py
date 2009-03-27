@@ -239,8 +239,11 @@ class Site(Config):
     def __init__(self):
         super(Site, self).__init__()
 
-        if not self.LIB_DIR in sys.path:
+        if not self.LIB_DIR in sys.path and os.path.isdir(self.LIB_DIR):
             sys.path.append(self.LIB_DIR)
+
+        self.layouts = {}
+        self.posts = []
 
         self.hooks()
 
@@ -250,9 +253,10 @@ class Site(Config):
         self.context.site.time = datetime.datetime.now()
 
     def hooks(self):
-        for f in sorted(os.listdir(self.HOOK_DIR)):
-            if f.endswith('.py'):
-                execfile(os.path.join(self.HOOK_DIR, f), globals())
+        if os.path.isdir(self.HOOK_DIR):
+            for f in sorted(os.listdir(self.HOOK_DIR)):
+                if f.endswith('.py'):
+                    execfile(os.path.join(self.HOOK_DIR, f), globals())
 
     def read(self):
         self.read_layouts()
@@ -267,19 +271,21 @@ class Site(Config):
         pass
 
     def read_layouts(self):
-        self.layouts = [Layout(os.path.join(self.LAYOUT_DIR, f),
-                               self.context)
-                            for f in os.listdir(self.LAYOUT_DIR)
-                                if not f.startswith('__')]
-        self.layouts = dict((l.name, l) for l in self.layouts)
+        if os.path.isdir(self.LAYOUT_DIR):
+            self.layouts = [Layout(os.path.join(self.LAYOUT_DIR, f),
+                                   self.context)
+                                for f in os.listdir(self.LAYOUT_DIR)
+                                    if not f.startswith('__')]
+            self.layouts = dict((l.name, l) for l in self.layouts)
 
     def read_posts(self):
-        self.posts = [Post(os.path.join(self.POST_DIR, f),
-                           self.layouts,
-                           self.context)
-                          for f in os.listdir(self.POST_DIR)
-                              if not f.startswith('__')]
-        self.context.site.posts = sorted(self.posts)
+        if os.path.isdir(self.POST_DIR):
+            self.posts = [Post(os.path.join(self.POST_DIR, f),
+                               self.layouts,
+                               self.context)
+                              for f in os.listdir(self.POST_DIR)
+                                  if not f.startswith('__')]
+            self.context.site.posts = sorted(self.posts)
 
     def calc_categories(self):
         self.categories = AttrDict()
@@ -367,6 +373,10 @@ if __name__ == '__main__':
         print 'Options:'
         print '  --serve[:port]   Start web server (default port 8000)\n'
         sys.exit(1)
+
+    if not os.path.isdir(base):
+        print 'error: invalid directory: %s' % base
+        sys.exit(2)
 
     if args:
         deploy = args.popleft()
