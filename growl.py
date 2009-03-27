@@ -33,7 +33,23 @@ import datetime
 import collections
 
 import yaml
-import jinja2
+
+
+def renderTemplate(template, context):
+    raise NotImplementedError('no template engine configured!')
+
+try:
+    import jinja2
+
+    def renderTemplate(template, context):
+        return jinja2.Template(template).render(context)
+
+    def templateFilter(func):
+        """ decorator to easily create jinja2 filters
+        """
+        jinja2.Template('').environment.filters[func.__name__] = func
+except ImportError:
+    pass
 
 
 class AttrDict(dict):
@@ -87,10 +103,10 @@ class Template(Config):
 
     def render(self):
         ctx = self.context.copy()
-        ctx.content = jinja2.Template(self.transform()).render(ctx)
+        ctx.content = renderTemplate(self.transform(), ctx)
         layout = self.layouts.get(ctx.layout)
         if layout:
-            return jinja2.Template(layout.content).render(ctx)
+            return renderTemplate(layout.content, ctx)
         else:
             return ctx.content
 
@@ -102,7 +118,7 @@ class Template(Config):
             layout = self.layouts.get(layout.layout)
 
         while layout != None:
-            ctx.content = jinja2.Template(layout.content).render(ctx)
+            ctx.content = renderTemplate(layout.content, ctx)
             layout = self.layouts.get(layout.layout)
 
         return ctx.content
@@ -328,12 +344,6 @@ class Site(Config):
             httpd.serve_forever()
         except KeyboardInterrupt:
             pass
-
-
-def templateFilter(func):
-    """ decorator to easily create jinja2 filters
-    """
-    jinja2.Template('').environment.filters[func.__name__] = func
 
 
 if __name__ == '__main__':
