@@ -233,7 +233,7 @@ class Site(Config):
     def hooks(self):
         for f in sorted(os.listdir(self.HOOK_DIR)):
             if f.endswith('.py'):
-                execfile(os.path.join(self.HOOK_DIR, f))
+                execfile(os.path.join(self.HOOK_DIR, f), globals())
 
     def read(self):
         self.read_layouts()
