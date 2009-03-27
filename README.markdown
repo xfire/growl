@@ -25,14 +25,13 @@ the following basic packages are needed:
 
 all other is optional depending on you own needs.
 
-I recommend to use [jinja2](http://jinja.pocoo.org/2/) as templating
-engine. growl will use jinja2 as default, if it is installed.
+I recommend to use [jinja2][jinja2] as templating engine. growl will 
+use [jinja2][jinja2] as default, if it is installed.
 
     > apt-get install python-jinja2
 
-you are free to use some other templating engine like
-[django](http://www.djangoproject.com/), [mako](http://www.makotemplates.org/)
-or [Cheetah](http://www.cheetahtemplate.org/). for examples how to
+you are free to use some other templating engine like [django][django],
+[mako][mako] or [cheetah][cheetah]. for examples how to
 configure them, see [extending growl](#extending_growl).
 
 ### finish the installation
@@ -68,21 +67,56 @@ simply specify this director as second parameter.
 input data
 ----------
 
-### files
+first at all, growl will ignore all files and directories which starts with
+a `.` or a `_`. (this can be changed via `Site.IGNORE`, see
+[extending growl](#extending_growl))
 
-### directories
+some directories begining with an `_` are special to growl:
+
+* `_deploy/` the default deploy directory
+* `_layout/` contains your site layouts
+* `_posts/` contains your posts
+* `_hooks/` contains all your hooks (see [extending growl](#extending_growl))
+* `_libs/` contains third party code (see [extending growl](#extending_growl))
+
+
+### layouts
+
+### posts
 
 
 <a name="extending_growl"/>
 extending growl
 ---------------
 
-* _hooks
-* _libs
+growl is very easy extendable via python code placed in the `_hooks` and
+`_libs` directory.
+
+if the `_libs` directory exists, it is added to the python module search path
+(`sys.path`). so python modules droped there, will be available in the code.
+
+all files in the `_hooks` directory, which ends with `.py`, are executed
+directly in the global scope of the growl.py file. thus a hook can freely
+shape growls code at will. growl love that! ;)
+
+here are some examples of what can be done. but you sure can imagine other
+cool things.
+
 
 ### configuring template engines
 
+
 ### register new transformers
+
+
+### change which files will be ignored
+
+growl decides to ignore files which filenames start with one of the tokens 
+defined in Site.IGNORE. so a hook with the following content will make
+growl to ignore all files begining with `.`, `_` and `foo`.
+
+    Site.IGNORE += ('foo',)
+
 
 ### define global template context content
 
@@ -93,7 +127,11 @@ simply add your content to `Site.CONTEXT` like these examples:
 
 note: `Site.CONTEXT.site` has to be an `AttrDict` instance!
 
+
 ### overwrite functions to change runtime behaviour
+
+
+#### add some verbosity
 
 as an example, we would display the currently processed post, while
 growl chomp your input.
@@ -121,3 +159,10 @@ since we don't want to implement a new write behaviour.
 license
 -------
 [GPLv2](http://www.gnu.org/licenses/gpl-2.0.html)
+
+
+
+  [jinja2]:  http://jinja.pocoo.org/2/          "jinja2"
+  [django]:  http://www.djangoproject.com/      "django"
+  [mako]:    http://www.makotemplates.org/      "mako"
+  [cheetah]: http://www.cheetahtemplate.org/    "cheetah"
