@@ -175,7 +175,7 @@ class Page(Template):
 
     @property
     def path(self):
-        path = os.path.abspath(self.filename)[:-1]
+        path = os.path.abspath(self.filename)
         path = path.replace(os.path.abspath(self.BASE_DIR), '', 1)
         return path.lstrip(os.path.sep)
 
@@ -233,6 +233,8 @@ class Post(Page):
 class Site(Config):
 
     CONTEXT = AttrDict()
+    IGNORE = ('_', '.')
+    TRANSFORM = ('.html', '.xhtml', '.xml')
 
     def __init__(self):
         super(Site, self).__init__()
@@ -297,18 +299,15 @@ class Site(Config):
         for p in self.posts:
             p.write()
 
-    IGNORE = ('_', '.')
-    TRANSFORM = ('_', )
-
     def write_site_content(self):
         """ copy site content to deploy directory.
 
             ignoring all files and directories, if their filename
             begins with a token defined in IGNORE.
 
-            files which end with an underscore are processed
-            with the Page class and the underscrore is
-            stripped from the output filename.
+            files with and filename ending with an token defined in
+            TRANSFORM are transformed via the Page class. all other
+            files are simple copied.
         """
         def ignore_filter(item):
             for ign in self.IGNORE:
