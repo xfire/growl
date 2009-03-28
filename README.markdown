@@ -156,6 +156,12 @@ the new, verboser write function lately call the stored original function,
 since we don't want to implement a new write behaviour.
 
 
+bug reporting
+-------------
+
+please report bugs [here](http://bugs.projects.spamt.net/cgi-bin/bugzilla3/enter_bug.cgi?product=growl).
+
+
 license
 -------
 [GPLv2](http://www.gnu.org/licenses/gpl-2.0.html)
