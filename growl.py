@@ -395,7 +395,7 @@ if __name__ == '__main__':
     site.deploy()
 
     if serve:
-        port = 8000
+        port = 8080
         if ':' in serve:
             serve, port = serve.split(':', 1)
         site.serve(port)
