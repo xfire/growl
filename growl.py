@@ -250,7 +250,8 @@ class Site(Config):
         self.context = Site.CONTEXT.copy()
         if not 'site' in self.context:
             self.context.site = AttrDict()
-        self.context.site.time = datetime.datetime.now()
+
+        self.context.site.now = datetime.datetime.now()
 
     def hooks(self):
         if os.path.isdir(self.HOOK_DIR):
