@@ -212,10 +212,6 @@ class Post(Page):
                                  int(self.day))
 
     @property
-    def permalink(self):
-        return self.context.get('permalink')
-
-    @property
     def url(self):
         return self.path
 
