@@ -90,6 +90,7 @@ class Template(Config):
         self.filename = filename
         self.layouts = layouts
         self.context = context.copy()
+        self.context.layout = None
         self.read_yaml()
 
     def read_yaml(self):
