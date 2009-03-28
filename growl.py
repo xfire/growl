@@ -77,6 +77,7 @@ class Config(object):
         cls.POST_DIR = os.path.join(base, '_posts')
         cls.HOOK_DIR = os.path.join(base, '_hooks')
         cls.LIB_DIR = os.path.join(base, '_libs')
+        cls.POST_FILE_EXT = '.xhtml'
 
 
 class Template(Config):
@@ -218,7 +219,7 @@ class Post(Page):
     @property
     def path(self):
         return os.path.join(self.year, self.month, self.day,
-                            self.slug, 'index.xhtml')
+                            self.slug, 'index' + self.POST_FILE_EXT)
 
     @property
     def content(self):
