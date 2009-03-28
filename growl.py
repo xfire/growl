@@ -362,6 +362,7 @@ class Site(Config):
 
 
 if __name__ == '__main__':
+    DEFAULT_PORT = 8080
     args = collections.deque(sys.argv[1:])
 
     serve = base = deploy = None
@@ -375,7 +376,7 @@ if __name__ == '__main__':
     else:
         print 'syntax: %s [options] <from> [to]\n' % sys.argv[0]
         print 'Options:'
-        print '  --serve[:port]   Start web server (default port 8000)\n'
+        print '  --serve[:port]   Start web server (default port %s)\n' % DEFAULT_PORT
         sys.exit(1)
 
     if not os.path.isdir(base):
@@ -395,7 +396,7 @@ if __name__ == '__main__':
     site.deploy()
 
     if serve:
-        port = 8080
+        port = DEFAULT_PORT
         if ':' in serve:
             serve, port = serve.split(':', 1)
         site.serve(port)
