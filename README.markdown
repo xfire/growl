@@ -79,10 +79,78 @@ some directories begining with an `_` are special to growl:
 * `_hooks/` contains all your hooks (see [extending growl](#extending_growl))
 * `_libs/` contains third party code (see [extending growl](#extending_growl))
 
+at least, all files ending with an `_` are processed as **pages**. (this can be
+changed via `Site.TRANSFORM`, see [extending growl](#extending_growl))
 
-### layouts
+all **pages** and **posts** can have an [yaml][yaml] header. this header must
+begin and end with a line containing 3 hyphen. e.g.
 
-### posts
+    ---
+    layout: post
+    title: my post title
+    category: spam, eggs
+    ---
+
+all data defined in this header will be attached to the corresponding object
+and can so accessed in your template code. an example in [jinja2][jinga2] may
+look like
+
+    <ul>
+    {% for post in site.posts|reverse %}
+        <li>{{ post.title }} - {{ post.date }}</li>
+    {% endfor %}
+    </ul>
+
+in the context of your template, you have access to one or more of the following
+objects.
+
+### site
+
+this holds the site wide informations.
+
+* site.now
+
+  current date and time when you run growl. this is a python
+  [datetime](http://docs.python.org/library/datetime.html#datetime-objects) object.
+
+    {{ site.now.year }}-{{site.now.month}}
+
+* site.posts
+
+  a chronological list of all posts.
+
+    {% for post in site.posts|reverse|slice(8) %}
+        {{ post.content }}
+    {% endfor %}
+
+
+* site.categories
+
+  a dictionary mapping category <-> posts.
+
+    <ul>    
+    {% for cat in site.categories %}
+        <li> <stong>{{ cat }}</strong>
+            <ul>
+                {% for post in site.categories.get(cat) %}
+                    <li><a href="{{ post.url }}">{{ post.title }}</a> - {{ post.date }}</li>
+                {% endfor %}
+            </ul>
+        </li>
+    {% endfor %}
+    </ul>
+
+### page
+
+* page.url
+
+### post
+
+* post.date
+* post.url
+* post.content
+
+### layout
 
 
 <a name="extending_growl"/>
@@ -106,7 +174,9 @@ cool things.
 ### configuring template engines
 
 
+
 ### register new transformers
+
 
 
 ### change which files will be ignored
@@ -116,6 +186,7 @@ defined in Site.IGNORE. so a hook with the following content will make
 growl to ignore all files begining with `.`, `_` and `foo`.
 
     Site.IGNORE += ('foo',)
+
 
 
 ### define global template context content
@@ -128,10 +199,8 @@ simply add your content to `Site.CONTEXT` like these examples:
 note: `Site.CONTEXT.site` has to be an `AttrDict` instance!
 
 
-### overwrite functions to change runtime behaviour
 
-
-#### add some verbosity
+### add some verbosity
 
 as an example, we would display the currently processed post, while
 growl chomp your input.
@@ -172,3 +241,4 @@ license
   [django]:  http://www.djangoproject.com/      "django"
   [mako]:    http://www.makotemplates.org/      "mako"
   [cheetah]: http://www.cheetahtemplate.org/    "cheetah"
+  [yaml]:    http://www.yaml.org/               "yaml"
