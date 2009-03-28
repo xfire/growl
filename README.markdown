@@ -92,7 +92,7 @@ begin and end with a line containing 3 hyphen. e.g.
     ---
 
 all data defined in this header will be attached to the corresponding object
-and can so accessed in your template code. an example in [jinja2][jinga2] may
+and can so accessed in your template code. an example in [jinja2][jinja2] may
 look like
 
     <ul>
@@ -108,14 +108,14 @@ objects.
 
 this holds the site wide informations.
 
-* site.now
+* `site.now`
 
   current date and time when you run growl. this is a python
   [datetime](http://docs.python.org/library/datetime.html#datetime-objects) object.
 
     {{ site.now.year }}-{{site.now.month}}
 
-* site.posts
+* `site.posts`
 
   a chronological list of all posts.
 
@@ -124,7 +124,7 @@ this holds the site wide informations.
     {% endfor %}
 
 
-* site.categories
+* `site.categories`
 
   a dictionary mapping category <-> posts.
 
@@ -142,13 +142,13 @@ this holds the site wide informations.
 
 ### page
 
-* page.url
+* `page.url`
 
 ### post
 
-* post.date
-* post.url
-* post.content
+* `post.date`
+* `post.url`
+* `post.content`
 
 ### layout
 
@@ -177,15 +177,42 @@ cool things.
 
 ### register new transformers
 
+new transformers can be registered in the `Config` class by adding a
+filename extension <-> transformation function mapping to the `transformers`
+attribute. here an example for markdown2:
+
+    import markdown2
+    import functools
+
+    Config.transformers['noop'] = lambda source: source
+    Config.transformers['markdown2'] = functools.partial(
+                markdown2.markdown,
+                extras={'code-color': {"noclasses": True}})
+
+the transformation function must return the transformed source text which is given
+as the only parameter. so if you need to add more parameters to your
+transformation function, best use the [functools](http://docs.python.org/library/functools.html)
+module as you see in the example above.
+
 
 
 ### change which files will be ignored
 
 growl decides to ignore files which filenames start with one of the tokens 
-defined in Site.IGNORE. so a hook with the following content will make
+defined in `Site.IGNORE`. so a hook with the following content will make
 growl to ignore all files begining with `.`, `_` and `foo`.
 
     Site.IGNORE += ('foo',)
+
+
+
+### change which files will be transformed on site generation
+
+growl decides to transform files based on the end of the filename. per 
+default, only files ending with an '_' are transformed. so modify
+`Site.TRANSFORM` in a hook to change this behaviour.
+
+    Site.TRANSFORM += ('.xhtml', '.markdown2')
 
 
 
@@ -216,12 +243,9 @@ following content:
     Post.write = verbose_write
 
 as you see, we first safe the original write function of the class `Post`
-under a new, unique name.
-
-then we overwrite the original write function with our brand new, super
-duper and much more verbose write function.
-
-the new, verboser write function lately call the stored original function,
+under a new, unique name. then we overwrite the original write function 
+with our brand new, super duper and much more verbose write function. the 
+new, verboser write function lately call the stored original function,
 since we don't want to implement a new write behaviour.
 
 
