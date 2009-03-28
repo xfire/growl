@@ -299,6 +299,7 @@ class Site(Config):
             p.write()
 
     IGNORE = ('_', '.')
+    TRANSFORM = ('_', )
 
     def write_site_content(self):
         """ copy site content to deploy directory.
@@ -318,6 +319,12 @@ class Site(Config):
 
         ignore = functools.partial(itertools.ifilter, ignore_filter)
 
+        def transformable(item):
+            for trn in self.TRANSFORM:
+                if item.endswith(trn):
+                    return True
+            return False
+
         for root, dirs, files in os.walk(self.BASE_DIR):
             base = root.replace(self.BASE_DIR, '')
 
@@ -328,7 +335,7 @@ class Site(Config):
             dirs[:] = ignore(dirs)
 
             for f in ignore(files):
-                if f.endswith('_'):
+                if transformable(f):
                     Page(os.path.join(root, f),
                          self.layouts,
                          self.context).write()
