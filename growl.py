@@ -164,7 +164,7 @@ class Layout(Template):
 
 class Page(Template):
 
-    TRANSFORM = ('_',)
+    TRANSFORM = ('_', )
 
     def __init__(self, filename, layout, context):
         super(Page, self).__init__(filename, layout, context)
@@ -321,6 +321,7 @@ class Site(Config):
             TRANSFORM are transformed via the Page class. all other
             files are simple copied.
         """
+
         def ignore_filter(item):
             for ign in self.IGNORE:
                 if item.startswith(ign):
@@ -384,7 +385,8 @@ if __name__ == '__main__':
     else:
         print 'syntax: %s [options] <from> [to]\n' % sys.argv[0]
         print 'Options:'
-        print '  --serve[:port]   Start web server (default port %s)\n' % DEFAULT_PORT
+        print '  --serve[:port]   Start web server',
+        print '(default port %s)\n' % DEFAULT_PORT
         sys.exit(1)
 
     if not os.path.isdir(base):
