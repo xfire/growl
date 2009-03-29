@@ -331,11 +331,12 @@ class Site(Config):
 
         for root, dirs, files in os.walk(self.BASE_DIR):
             base = root.replace(self.BASE_DIR, '')
+            base = base.lstrip(os.path.sep)
 
             for d in ignore(dirs):
-                    nd = os.path.join(self.DEPLOY_DIR, base, d)
-                    if not os.path.isdir(nd):
-                        os.makedirs(nd)
+                nd = os.path.join(self.DEPLOY_DIR, base, d)
+                if not os.path.isdir(nd):
+                    os.makedirs(nd)
             dirs[:] = ignore(dirs)
 
             for f in ignore(files):
