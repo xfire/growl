@@ -164,6 +164,8 @@ class Layout(Template):
 
 class Page(Template):
 
+    TRANSFORM = ('_',)
+
     def __init__(self, filename, layout, context):
         super(Page, self).__init__(filename, layout, context)
 
@@ -176,6 +178,11 @@ class Page(Template):
     @property
     def path(self):
         path = os.path.abspath(self.filename)
+        npath, ext = os.path.splitext(path)
+        if self.filename[-1] in Page.TRANSFORM:
+            path = path[:-1]
+        elif ext and ext[1:] in self.transformers:
+            path = npath
         path = path.replace(os.path.abspath(self.BASE_DIR), '', 1)
         return path.lstrip(os.path.sep)
 
@@ -185,6 +192,12 @@ class Page(Template):
 
     def write(self):
         return super(Page, self).write(self.path, self.layout())
+
+    @staticmethod
+    def transformable(filename):
+        ext = os.path.splitext(filename)[-1]
+        return ((filename[-1] in Page.TRANSFORM) or
+                (ext and ext[1:] in Page.transformers))
 
 
 class Post(Page):
@@ -234,7 +247,6 @@ class Site(Config):
 
     CONTEXT = AttrDict()
     IGNORE = ('_', '.')
-    TRANSFORM = ('.html', '.xhtml', '.xml')
 
     def __init__(self):
         super(Site, self).__init__()
@@ -317,12 +329,6 @@ class Site(Config):
 
         ignore = functools.partial(itertools.ifilter, ignore_filter)
 
-        def transformable(item):
-            for trn in self.TRANSFORM:
-                if item.endswith(trn):
-                    return True
-            return False
-
         for root, dirs, files in os.walk(self.BASE_DIR):
             base = root.replace(self.BASE_DIR, '')
 
@@ -333,7 +339,7 @@ class Site(Config):
             dirs[:] = ignore(dirs)
 
             for f in ignore(files):
-                if transformable(f):
+                if Page.transformable(f):
                     Page(os.path.join(root, f),
                          self.layouts,
                          self.context).write()
