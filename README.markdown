@@ -67,8 +67,13 @@ simply specify this director as second parameter.
 input data
 ----------
 
-first at all, growl will ignore all files and directories which starts with
+growl will ignore all files and directories which starts with
 a `.` or a `_`. (this can be changed via `Site.IGNORE`, see
+[extending growl](#extending_growl))
+
+all files ending with `_` or an transformer extension (`Config.transformers`)
+are processed as **pages**. in that cases, the ending will be striped from
+the filename. (this can be changed via `Site.TRANSFORM`, see
 [extending growl](#extending_growl))
 
 some directories begining with an `_` are special to growl:
@@ -79,12 +84,8 @@ some directories begining with an `_` are special to growl:
 * `_hooks/` contains all your hooks (see [extending growl](#extending_growl))
 * `_libs/` contains third party code (see [extending growl](#extending_growl))
 
-at least, all files ending with `.xhtml`, `.html` or `.xml` are processed as 
-**pages**. (this can be changed via `Site.TRANSFORM`, see
-[extending growl](#extending_growl))
-
-all **pages** and **posts** can have an [yaml][yaml] header. this header must
-begin and end with a line containing 3 hyphen. e.g.
+all **pages** and **posts** optionally can have an [yaml][yaml] header. this
+header must begin and end with a line containing 3 hyphen. e.g.
 
     ---
     layout: post
