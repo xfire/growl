@@ -399,6 +399,19 @@ if __name__ == '__main__':
         deploy = os.path.join(base, '_deploy')
 
     Config.updateconfig(base, deploy)
+
+    try:
+        import markdown
+        Config.transformers['markdown'] = markdown.markdown
+    except ImportError:
+        pass
+
+    try:
+        import textile
+        Config.transformers['textile'] = textile.textile
+    except ImportError:
+        pass
+
     site = Site()
 
     site.read()
