@@ -228,12 +228,12 @@ class Post(Page):
 
     @property
     def url(self):
-        return self.path
+        return os.path.join(self.year, self.month, self.day, self.slug)
 
     @property
     def path(self):
-        return os.path.join(self.year, self.month, self.day,
-                            self.slug, 'index' + self.POST_FILE_EXT)
+        return os.path.join(self.url, 'index' + self.POST_FILE_EXT)
+ 
 
     @property
     def content(self):
