@@ -305,6 +305,8 @@ class Site(Config):
         for post in self.posts:
             for cat in post.categories:
                 self.categories.setdefault(cat, []).append(post)
+            if not post.categories:
+                self.categories.setdefault(None, []).append(post)
         self.context.site.categories = self.categories
 
     def write_posts(self):
