@@ -237,18 +237,15 @@ growl chomp your input.
 create a new file (e.g. `verbose.py`) in the `_hooks` directory with the
 following content:
 
-    def verbose_write(self):
-        print 'generating post: %s (from: %s)' % (self.title, self.filename)
-        return self._org_verbose_write()
+    def verbose_post_write(self):
+        print 'post: %s - %s\n' % (self.date.strftime('%Y-%m-%d'), self.title)
+        return verbose_post_write.super(self)
+    Post.write = wrap(Post.write, verbose_post_write)
 
-    Post._org_verbose_write = Post.write
-    Post.write = verbose_write
+grows offers the helper function `wrap`, which wrap an existing function
+of a class with a new one. to access the original function, use
+`<new_function_name>.super(self, ...)` like in the example above.
 
-as you see, we first safe the original write function of the class `Post`
-under a new, unique name. then we overwrite the original write function 
-with our brand new, super duper and much more verbose write function. the 
-new, verboser write function lately call the stored original function,
-since we don't want to implement a new write behaviour.
 
 
 bug reporting

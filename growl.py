@@ -54,6 +54,24 @@ except ImportError:
     pass
 
 
+def wrap(orig_func, new_func, name = 'super'):
+    """
+    helper function to wrap an existing function of a class.
+    e.g.
+
+    def verbose_write(self):
+        print 'generating post: %s (from: %s)' % (self.title, self.filename)
+        return verbose_write.super(self)
+    Post.write = wrap(Post.write, verbose_write)
+
+    the original function will be available as <new_function_name>.super.
+    """
+    @functools.wraps(orig_func)
+    def wrapper(*args, **kwargs):
+        setattr(new_func, name, orig_func)
+        return new_func(*args, **kwargs)
+    return wrapper
+
 class AttrDict(dict):
 
     def __getattr__(self, name):
