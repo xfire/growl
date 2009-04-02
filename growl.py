@@ -143,6 +143,10 @@ class Template(Config):
                                     (self.__class__.__name__, name))
         return self.context[name]
 
+    @property
+    def transformed(self):
+        return self.transform()
+
 
 class Layout(Template):
 
