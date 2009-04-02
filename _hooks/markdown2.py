@@ -12,4 +12,4 @@ import functools
 
 Config.transformers['markdown2'] = functools.partial(
             markdown2.markdown,
-            extras={'code-color': {"noclasses": True}})
+            extras={'code-color': {"classes": True}})
