@@ -73,8 +73,7 @@ a `.` or a `_`. (this can be changed via `Site.IGNORE`, see
 
 all files ending with `_` or an transformer extension (`Config.transformers`)
 are processed as **pages**. in that cases, the ending will be striped from
-the filename. (this can be changed via `Site.TRANSFORM`, see
-[extending growl](#extending_growl))
+the filename. 
 
 some directories begining with an `_` are special to growl:
 
@@ -205,16 +204,6 @@ defined in `Site.IGNORE`. so a hook with the following content will make
 growl to ignore all files begining with `.`, `_` and `foo`.
 
     Site.IGNORE += ('foo',)
-
-
-
-### change which files will be transformed on site generation
-
-growl decides to transform files based on the end of the filename. per 
-default, only files ending with an '_' are transformed. so modify
-`Site.TRANSFORM` in a hook to change this behaviour.
-
-    Site.TRANSFORM += ('.xhtml', '.markdown2')
 
 
 
