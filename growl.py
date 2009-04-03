@@ -95,7 +95,7 @@ class Config(object):
         cls.POST_DIR = os.path.join(base, '_posts')
         cls.HOOK_DIR = os.path.join(base, '_hooks')
         cls.LIB_DIR = os.path.join(base, '_libs')
-        cls.POST_FILE_EXT = '.xhtml'
+        cls.POST_FILE_EXT = '.html'
 
 
 class Template(Config):
