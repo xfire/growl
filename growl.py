@@ -289,7 +289,7 @@ class Site(Config):
 
     def hooks(self):
         if os.path.isdir(self.HOOK_DIR):
-            for f in sorted(os.listdir(self.HOOK_DIR)):
+            for f in sorted(self.ignoreFilter(os.listdir(self.HOOK_DIR))):
                 if f.endswith('.py'):
                     execfile(os.path.join(self.HOOK_DIR, f), globals())
 
@@ -309,8 +309,8 @@ class Site(Config):
         if os.path.isdir(self.LAYOUT_DIR):
             self.layouts = [Layout(os.path.join(self.LAYOUT_DIR, f),
                                    self.context)
-                                for f in os.listdir(self.LAYOUT_DIR)
-                                    if not f.startswith('__')]
+                                for f in self.ignoreFilter(os.listdir(
+                                                            self.LAYOUT_DIR))]
             self.layouts = dict((l.name, l) for l in self.layouts)
 
     def read_posts(self):
@@ -318,8 +318,8 @@ class Site(Config):
             self.posts = [Post(os.path.join(self.POST_DIR, f),
                                self.layouts,
                                self.context)
-                              for f in os.listdir(self.POST_DIR)
-                                  if not f.startswith('__')]
+                              for f in self.ignoreFilter(os.listdir(
+                                                            self.POST_DIR))]
             self.context.site.posts = sorted(self.posts)
 
     def calc_categories(self):
@@ -346,25 +346,17 @@ class Site(Config):
             files are simple copied.
         """
 
-        def ignore_filter(item):
-            for ign in self.IGNORE:
-                if item.startswith(ign):
-                    return False
-            return True
-
-        ignore = functools.partial(itertools.ifilter, ignore_filter)
-
         for root, dirs, files in os.walk(self.BASE_DIR):
             base = root.replace(self.BASE_DIR, '')
             base = base.lstrip(os.path.sep)
 
-            for d in ignore(dirs):
+            for d in self.ignoreFilter(dirs):
                 nd = os.path.join(self.DEPLOY_DIR, base, d)
                 if not os.path.isdir(nd):
                     os.makedirs(nd)
-            dirs[:] = ignore(dirs)
+            dirs[:] = self.ignoreFilter(dirs)
 
-            for f in ignore(files):
+            for f in self.ignoreFilter(files):
                 if Page.transformable(f):
                     Page(os.path.join(root, f),
                          self.layouts,
@@ -393,6 +385,16 @@ class Site(Config):
         except KeyboardInterrupt:
             pass
 
+    def ignoreFilter(self, seq):
+        """ filter out files starting with self.IGNORE tokens
+        """
+        def ignore_filter(item):
+            for ign in self.IGNORE:
+                if item.startswith(ign):
+                    return False
+            return True
+        return itertools.ifilter(ignore_filter, seq)
+        
 
 if __name__ == '__main__':
     DEFAULT_PORT = 8080
