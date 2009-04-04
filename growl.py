@@ -448,11 +448,15 @@ if __name__ == '__main__':
     DEFAULT_PORT = 8080
     args = collections.deque(sys.argv[1:])
 
-    serve = base = deploy = None
+    serve = base = deploy_path = None
+    deploy_site = False
+
     while args and args[0].startswith('--'):
         arg = args.popleft()
         if arg.startswith('--serve'):
             serve = arg
+        elif arg.startswith('--deploy'):
+            deploy_site = True
 
     if args:
         base = args.popleft()
@@ -468,11 +472,11 @@ if __name__ == '__main__':
         sys.exit(2)
 
     if args:
-        deploy = args.popleft()
+        deploy_path = args.popleft()
     else:
-        deploy = os.path.join(base, '_deploy')
+        deploy_path = os.path.join(base, '_deploy')
 
-    Config.updateconfig(base, deploy)
+    Config.updateconfig(base, deploy_path)
 
     try:
         import markdown
@@ -490,7 +494,8 @@ if __name__ == '__main__':
 
     site.read()
     site.generate()
-    site.deploy()
+    if deploy_site:
+        site.deploy()
 
     if serve:
         port = DEFAULT_PORT
