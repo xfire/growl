@@ -63,6 +63,11 @@ simply specify this director as second parameter.
   generate the site to the deploy directory and then start a simple
   webserver. this is intended to be used for testing purposes only.
 
+* `--deploy`
+
+  trigger deploy process. this do nothing per default, but you can
+  add actions using hooks. (see `_hooks/deploy_rsync.py`)
+
 
 input data
 ----------
@@ -254,3 +259,4 @@ license
   [mako]:    http://www.makotemplates.org/      "mako"
   [cheetah]: http://www.cheetahtemplate.org/    "cheetah"
   [yaml]:    http://www.yaml.org/               "yaml"
+
