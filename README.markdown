@@ -1,5 +1,3 @@
-under construction...
-
 growl - python based, easy extendable, blog aware, static site generator
 ========================================================================
 
@@ -12,6 +10,9 @@ nevertheless growl brings some nice features:
 * minimal dependencies
 * easy to install (and use? ;])
 * easy to extend
+
+the [growl based site of my blog](http://github.com/xfire/downgrade/tree)
+is also available on github.
 
 
 installation
@@ -79,6 +80,12 @@ a `.` or a `_`. (this can be changed via `Site.IGNORE`, see
 all files ending with `_` or an transformer extension (`Config.transformers`)
 are processed as **pages**. in that cases, the ending will be striped from
 the filename. 
+
+e.g.
+
+* `index.html_`  ->  `index.html`
+* `atom.xml_`  ->  `atom.xml`
+* `somefile.txt.markdown`  ->  `somefile.txt`
 
 some directories begining with an `_` are special to growl:
 
