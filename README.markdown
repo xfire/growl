@@ -136,6 +136,10 @@ this holds the site wide informations.
         {{ post.content }}
     {% endfor %}
 
+* `site.unpublished_posts`
+
+  a chronological list of all unpublished posts. e.g. all posts which set `publish` to
+  false.
 
 * `site.categories`
 
@@ -172,6 +176,13 @@ this holds the site wide informations.
 * `post.url`
 
   the relative url to the post
+
+* `post.publish`
+
+  if set to false, the post will be generated, but is not in the list of `site.posts`. instead
+  it's in the `site.unpublished_posts` list.
+
+  if `publish` is not set, growl will assume this as true and the post will be normally published.
 
 * `post.content`
 

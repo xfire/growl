@@ -57,12 +57,13 @@ except ImportError:
 def wrap(orig_func, new_func, name = 'super'):
     """ helper function to wrap an existing function of a class.
         e.g.
-    
+
         def verbose_write(self):
-            print 'generating post: %s (from: %s)' % (self.title, self.filename)
+            print 'generating post: %s (from: %s)' % (self.title,
+                                                      self.filename)
             return verbose_write.super(self)
         Post.write = wrap(Post.write, verbose_write)
-    
+
         the original function will be available as <new_function_name>.super.
     """
 
@@ -106,7 +107,7 @@ class Config(object):
 class Template(Config):
     """ abstract template base class providing support for an
         yaml header, transforming based on file extension,
-        rendering (only using current layout if defined) and 
+        rendering (only using current layout if defined) and
         layouting (applying all layouts).
     """
 
@@ -295,6 +296,10 @@ class Post(Page):
     def content(self):
         return self.render()
 
+    @property
+    def publish(self):
+        return self.context.get('publish', True)
+
     def __cmp__(self, other):
         return cmp(self.date, other.date)
 
@@ -367,15 +372,19 @@ class Site(Config):
                                self.context)
                               for f in self.ignoreFilter(os.listdir(
                                                             self.POST_DIR))]
-            self.context.site.posts = sorted(self.posts)
+            self.context.site.posts = sorted(p for p in self.posts
+                                                if p.publish)
+            self.context.site.unpublished_posts = sorted(p for p in self.posts
+                                                            if not p.publish)
 
     def calc_categories(self):
         self.categories = AttrDict()
         for post in self.posts:
-            for cat in post.categories:
-                self.categories.setdefault(cat, []).append(post)
-            if not post.categories:
-                self.categories.setdefault(None, []).append(post)
+            if post.publish:
+                for cat in post.categories:
+                    self.categories.setdefault(cat, []).append(post)
+                if not post.categories:
+                    self.categories.setdefault(None, []).append(post)
         self.context.site.categories = self.categories
 
     def write_posts(self):
