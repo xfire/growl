@@ -141,7 +141,7 @@ this holds the site wide informations.
 
   a dictionary mapping category <-> posts.
 
-    <ul>    
+    <ul>
     {% for cat in site.categories %}
         <li> <stong>{{ cat }}</strong>
             <ul>
@@ -157,13 +157,30 @@ this holds the site wide informations.
 
 * `page.url`
 
+  the relative url to the page.
+
+* `page.transformed`
+
+  the transformed content. no layouts are applied here.
+
 ### post
 
 * `post.date`
+
+  a datetime object with the publish date of the post
+
 * `post.url`
+
+  the relative url to the post
+
 * `post.content`
 
-### layout
+  the transformed content. exactly the layout specified in the [yaml][yaml] header is applied.
+  (no recursive applying)
+
+* `post.transformed`
+
+  the transformed content. no layouts are applied here.
 
 
 <a name="extending_growl"/>
