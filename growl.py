@@ -22,7 +22,7 @@
 __author__ = 'Rico Schiekel <fire@downgra.de>'
 __copyright__ = 'Copyright (C) 2009 Rico Schiekel'
 __license__ = 'GPLv2'
-__version__ = '0.1'
+__version__ = '0.3'
 
 
 import os
@@ -466,6 +466,9 @@ if __name__ == '__main__':
             serve = arg
         elif arg.startswith('--deploy'):
             deploy_site = True
+        elif arg.startswith('--version'):
+            print 'growl version %s - %s (%s)' % (__version__, __copyright__, __license__)
+            sys.exit(0)
 
     if args:
         base = args.popleft()
@@ -473,7 +476,9 @@ if __name__ == '__main__':
         print 'syntax: %s [options] <from> [to]\n' % sys.argv[0]
         print 'Options:'
         print '  --serve[:port]   Start web server',
-        print '(default port %s)\n' % DEFAULT_PORT
+        print '(default port %s)' % DEFAULT_PORT
+        print '  --version        Output version information and exit'
+        print
         sys.exit(1)
 
     if not os.path.isdir(base):
