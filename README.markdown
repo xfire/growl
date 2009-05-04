@@ -266,14 +266,15 @@ growl chomp your input.
 create a new file (e.g. `verbose.py`) in the `_hooks` directory with the
 following content:
 
-    def verbose_post_write(self):
+    def verbose_post_write(forig, self):
         print 'post: %s - %s\n' % (self.date.strftime('%Y-%m-%d'), self.title)
-        return verbose_post_write.super(self)
+        return forig(self)
     Post.write = wrap(Post.write, verbose_post_write)
 
 grows offers the helper function `wrap`, which wrap an existing function
-of a class with a new one. to access the original function, use
-`<new_function_name>.super(self, ...)` like in the example above.
+of a class with a new one. the original function, is given to your new function
+as the first parameter (`forig`).
+
 
 
 
