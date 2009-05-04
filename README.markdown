@@ -281,7 +281,7 @@ as the first parameter (`forig`).
 bug reporting
 -------------
 
-please report bugs [here](http://bugs.projects.spamt.net/cgi-bin/bugzilla3/enter_bug.cgi?product=growl).
+please report bugs [here](http://github.com/xfire/growl/issues).
 
 
 license
