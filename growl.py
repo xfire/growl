@@ -54,24 +54,28 @@ except ImportError:
     pass
 
 
-def wrap(orig_func, new_func, name = 'super'):
-    """ helper function to wrap an existing function of a class.
+def wrap(orig_func):
+    """ decorator to wrap an existing function of a class.
         e.g.
 
+        @wrap(Post.write)
         def verbose_write(forig, self):
             print 'generating post: %s (from: %s)' % (self.title,
                                                       self.filename)
             return forig(self)
-        Post.write = wrap(Post.write, verbose_write)
 
         the first parameter of the new function is the the original,
         overwritten function ('forig').
     """
 
+    # har, some funky python magic NOW!
     @functools.wraps(orig_func)
-    def wrapper(*args, **kwargs):
-        return new_func(orig_func, *args, **kwargs)
-    return wrapper
+    def outer(new_func):
+        def wrapper(*args, **kwargs):
+            return new_func(orig_func, *args, **kwargs)
+        setattr(orig_func.im_class, orig_func.__name__, wrapper)
+        return wrapper
+    return outer
 
 
 class AttrDict(dict):
