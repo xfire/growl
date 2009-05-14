@@ -102,7 +102,6 @@ class Config(object):
         cls.BASE_DIR = base
         cls.DEPLOY_DIR = deploy
         cls.LAYOUT_DIR = os.path.join(base, '_layout')
-        cls.POST_DIR = os.path.join(base, '_posts')
         cls.HOOK_DIR = os.path.join(base, '_hooks')
         cls.LIB_DIR = os.path.join(base, '_libs')
         cls.POST_FILE_EXT = '.html'
@@ -259,55 +258,6 @@ class Page(Template):
                 (ext and ext[1:] in Page.transformers))
 
 
-class Post(Page):
-    """ a post template mapping a single post from the _posts/
-        directory.
-    """
-
-    def __init__(self, filename, layout, context):
-        super(Post, self).__init__(filename, layout, context)
-
-        base = os.path.basename(filename)
-        ext = os.path.splitext(base)
-
-        self.year, self.month, self.day, self.slug = ext[0].split('-', 3)
-
-        self.context.post = self
-
-        cats = ','.join((self.context.get('category', ''),
-                         self.context.get('categories', '')))
-        if 'category' in self.context:
-            del self.context['category']
-        if 'categories' in self.context:
-            del self.context['categories']
-        self.categories = [c.strip() for c in cats.split(',') if c]
-
-    @property
-    def date(self):
-        return datetime.datetime(int(self.year),
-                                 int(self.month),
-                                 int(self.day))
-
-    @property
-    def url(self):
-        return os.path.join(self.year, self.month, self.day, self.slug)
-
-    @property
-    def path(self):
-        return os.path.join(self.url, 'index' + self.POST_FILE_EXT)
-
-    @property
-    def content(self):
-        return self.render()
-
-    @property
-    def publish(self):
-        return self.context.get('publish', True)
-
-    def __cmp__(self, other):
-        return cmp(self.date, other.date)
-
-
 class Site(Config):
     """ controls the site and holds the global context object. the context
         object contains all layouts, all posts and categories.
@@ -324,7 +274,6 @@ class Site(Config):
             sys.path.append(self.LIB_DIR)
 
         self.layouts = {}
-        self.posts = []
 
         self.hooks()
 
@@ -343,16 +292,13 @@ class Site(Config):
                     execfile(os.path.join(self.HOOK_DIR, f), globals())
 
     def read(self):
-        """ read all layouts and posts and calculate the categories.
+        """ read all layouts.
         """
         self.read_layouts()
-        self.read_posts()
-        self.calc_categories()
 
     def generate(self):
         """ write all posts and then the site content to the deploy directory.
         """
-        self.write_posts()
         self.write_site_content()
 
     def deploy(self):
@@ -368,32 +314,6 @@ class Site(Config):
                                 for f in self.ignoreFilter(os.listdir(
                                                             self.LAYOUT_DIR))]
             self.layouts = dict((l.name, l) for l in self.layouts)
-
-    def read_posts(self):
-        if os.path.isdir(self.POST_DIR):
-            self.posts = [Post(os.path.join(self.POST_DIR, f),
-                               self.layouts,
-                               self.context)
-                              for f in self.ignoreFilter(os.listdir(
-                                                            self.POST_DIR))]
-            self.context.site.posts = sorted(p for p in self.posts
-                                                if p.publish)
-            self.context.site.unpublished_posts = sorted(p for p in self.posts
-                                                            if not p.publish)
-
-    def calc_categories(self):
-        self.categories = AttrDict()
-        for post in self.posts:
-            if post.publish:
-                for cat in post.categories:
-                    self.categories.setdefault(cat, []).append(post)
-                if not post.categories:
-                    self.categories.setdefault(None, []).append(post)
-        self.context.site.categories = self.categories
-
-    def write_posts(self):
-        for p in self.posts:
-            p.write()
 
     def write_site_content(self):
         """ copy site content to deploy directory.
