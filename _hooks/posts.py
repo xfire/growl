@@ -70,9 +70,13 @@ class Post(Page):
 
     @staticmethod
     def setup(clazz):
+        """ register post handling code to the Site class.
+        """
         clazz.POST_DIR = os.path.join(clazz.BASE_DIR, '_posts')
 
         def read_posts(self):
+            """ read all posts.
+            """
             self.posts = []
             if os.path.isdir(self.POST_DIR):
                 self.posts = [Post(os.path.join(self.POST_DIR, f),
@@ -86,6 +90,8 @@ class Post(Page):
                                                                 if not p.publish)
 
         def calc_categories(self):
+            """ calculate the post categories.
+            """
             self.categories = AttrDict()
             for post in self.posts:
                 if post.publish:
@@ -96,12 +102,15 @@ class Post(Page):
             self.context.site.categories = self.categories
 
         def write_posts(self):
+            """ write all posts to the deploy directory.
+            """
             for p in self.posts:
                 p.write()
 
         @wrap(clazz.read)
         def site_read(forig, self):
-            """ read all posts and calculate the categories.
+            """ first call the original Site.read() method, then read all 
+                posts and calculate the categories.
             """
             forig(self)
             read_posts(self)
@@ -109,7 +118,8 @@ class Post(Page):
 
         @wrap(clazz.generate)
         def site_generate(forig, self):
-            """ write all posts to the deploy directory.
+            """ write all posts to the deploy directory, then call original
+                Site.generate() method.
             """
             write_posts(self)
             forig(self)
