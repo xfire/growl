@@ -33,6 +33,7 @@ import datetime
 import collections
 import itertools
 import functools
+import inspect
 
 import yaml
 
@@ -55,7 +56,7 @@ except ImportError:
 
 
 def wrap(orig_func):
-    """ decorator to wrap an existing function of a class.
+    """ decorator to wrap an existing method of a class.
         e.g.
 
         @wrap(Post.write)
@@ -73,7 +74,8 @@ def wrap(orig_func):
     def outer(new_func):
         def wrapper(*args, **kwargs):
             return new_func(orig_func, *args, **kwargs)
-        setattr(orig_func.im_class, orig_func.__name__, wrapper)
+        if inspect.ismethod(orig_func):
+            setattr(orig_func.im_class, orig_func.__name__, wrapper)
         return wrapper
     return outer
 
