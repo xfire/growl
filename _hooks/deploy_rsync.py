@@ -21,6 +21,7 @@ import subprocess
 
 REMOTE_PATH = 'user@host:/path/'
 
+
 @wrap(Site.deploy)
 def deploy_rsync(self):
     cmd = 'rsync -ahz --delete %s/* %s\n' % (self.DEPLOY_DIR, REMOTE_PATH)
@@ -31,4 +32,3 @@ def deploy_rsync(self):
     else:
         sys.stderr.write('<<< failed! (return code: %d)\n' % ret)
     return deploy_rsync.super(self)
-

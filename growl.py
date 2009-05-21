@@ -70,10 +70,13 @@ def wrap(orig_func):
     """
 
     # har, some funky python magic NOW!
+
     @functools.wraps(orig_func)
     def outer(new_func):
+
         def wrapper(*args, **kwargs):
             return new_func(orig_func, *args, **kwargs)
+
         if inspect.ismethod(orig_func):
             setattr(orig_func.im_class, orig_func.__name__, wrapper)
         return wrapper
@@ -393,7 +396,9 @@ if __name__ == '__main__':
         elif arg.startswith('--deploy'):
             deploy_site = True
         elif arg.startswith('--version'):
-            print 'growl version %s - %s (%s)' % (__version__, __copyright__, __license__)
+            print 'growl version %s - %s (%s)' % (__version__,
+                                                  __copyright__,
+                                                  __license__)
             sys.exit(0)
 
     if args:

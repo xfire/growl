@@ -17,6 +17,7 @@
 # MA 02110-1301, USA.
 #
 
+
 @templateFilter
 def dateFormat(dt, format='%Y-%m-%d'):
     return dt.strftime(format)
@@ -44,4 +45,3 @@ def xtruncate(s, length=255, end='...'):
                    show_body_only=1,
                    tidy_mark=0)
     return str(tidy.parseString(str(s[:length]) + end, **options))
-

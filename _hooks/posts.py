@@ -20,6 +20,7 @@
 import os
 import datetime
 
+
 class Post(Page):
     """ a post template mapping a single post from the _posts/
         directory.
@@ -82,12 +83,12 @@ class Post(Page):
                 self.posts = [Post(os.path.join(self.POST_DIR, f),
                                    self.layouts,
                                    self.context)
-                                  for f in self.ignoreFilter(os.listdir(
-                                                                self.POST_DIR))]
+                              for f in self.ignoreFilter(
+                                  os.listdir(self.POST_DIR))]
                 self.context.site.posts = sorted(p for p in self.posts
                                                     if p.publish)
-                self.context.site.unpublished_posts = sorted(p for p in self.posts
-                                                                if not p.publish)
+                self.context.site.unpublished_posts = sorted(
+                    p for p in self.posts if not p.publish)
 
         def calc_categories(self):
             """ calculate the post categories.
@@ -109,7 +110,7 @@ class Post(Page):
 
         @wrap(clazz.read)
         def site_read(forig, self):
-            """ first call the original Site.read() method, then read all 
+            """ first call the original Site.read() method, then read all
                 posts and calculate the categories.
             """
             forig(self)
@@ -125,4 +126,3 @@ class Post(Page):
             forig(self)
 
 Post.setup(Site) # whooha!
-
