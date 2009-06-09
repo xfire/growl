@@ -34,6 +34,7 @@ import collections
 import itertools
 import functools
 import inspect
+from optparse import OptionParser
 
 import yaml
 
@@ -100,6 +101,8 @@ class AttrDict(dict):
 class Config(object):
     """ base class providing some static configuration values.
     """
+
+    LIB_DIR = HOOK_DIR = ''
 
     @classmethod
     def updateconfig(cls, base, deploy):
@@ -381,47 +384,60 @@ class Site(Config):
             return True
         return itertools.ifilter(ignore_filter, seq)
 
+    def setupOptions(self, parser):
+        parser.add_option('--serve',
+                          action = 'store', dest = 'serve',
+                          metavar = 'PORT',
+                          help = 'Start web server')
+
+        parser.set_defaults(version = False)
+        parser.add_option('-v', '--version',
+                          action = 'store_true', dest = 'version',
+                          help = 'Output version information and exit')
+
 
 if __name__ == '__main__':
     DEFAULT_PORT = 8080
-    args = collections.deque(sys.argv[1:])
+    parser = OptionParser(usage = 'syntax: %prog [options] <from> [to]')
 
-    serve = base = deploy_path = None
-    deploy_site = False
+    base = deploy_path = None
+    args = sys.argv[1:]
+    try:
+        if not args[-1].startswith('--'):
+            deploy_path = args.pop()
+    except IndexError:
+        pass
 
-    while args and args[0].startswith('--'):
-        arg = args.popleft()
-        if arg.startswith('--serve'):
-            serve = arg
-        elif arg.startswith('--deploy'):
-            deploy_site = True
-        elif arg.startswith('--version'):
-            print 'growl version %s - %s (%s)' % (__version__,
-                                                  __copyright__,
-                                                  __license__)
-            sys.exit(0)
+    try:
+        if not args[-1].startswith('--'):
+            base = args.pop()
+        else:
+            raise IndexError
+    except IndexError:
+        if deploy_path:
+            base = deploy_path
+            deploy_path = os.path.join(base, '_deploy')
 
-    if args:
-        base = args.popleft()
-    else:
-        print 'syntax: %s [options] <from> [to]\n' % sys.argv[0]
-        print 'Options:'
-        print '  --serve[:port]   Start web server',
-        print '(default port %s)' % DEFAULT_PORT
-        print '  --version        Output version information and exit'
-        print
-        sys.exit(1)
+    if base and os.path.isdir(base):
+        Config.updateconfig(base, deploy_path)
+
+    site = Site()
+
+    site.setupOptions(parser)
+    (options, args) = parser.parse_args(args)
+
+    if options.version:
+        print 'growl version %s - %s (%s)' % (__version__,
+                                              __copyright__,
+                                              __license__)
+        sys.exit(0)
+
+    if not base:
+        parser.error('"from" parameter missing!')
 
     if not os.path.isdir(base):
         print 'error: invalid directory: %s' % base
         sys.exit(2)
-
-    if args:
-        deploy_path = args.popleft()
-    else:
-        deploy_path = os.path.join(base, '_deploy')
-
-    Config.updateconfig(base, deploy_path)
 
     try:
         import markdown
@@ -435,15 +451,11 @@ if __name__ == '__main__':
     except ImportError:
         pass
 
-    site = Site()
-
+    site.options = options
     site.read()
     site.generate()
-    if deploy_site:
-        site.deploy()
+    site.deploy()
 
-    if serve:
-        port = DEFAULT_PORT
-        if ':' in serve:
-            serve, port = serve.split(':', 1)
+    if options.serve != None:
+        port = int(options.serve)
         site.serve(port)

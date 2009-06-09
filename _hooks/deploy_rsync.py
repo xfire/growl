@@ -21,9 +21,18 @@ import subprocess
 
 REMOTE_PATH = 'user@host:/path/'
 
+@wrap(Site.setupOptions)
+def setupOptions(forig, self, parser):
+    forig(self, parser)
+    parser.set_defaults(deploy = False)
+    parser.add_option('--deploy',
+                      action = 'store_true', dest = 'deploy',
+                      help = 'foo')
+
 
 @wrap(Site.deploy)
-def deploy_rsync(self):
+def deploy_rsync(forig, self):
+    forig(self)
     cmd = 'rsync -ahz --delete %s/* %s\n' % (self.DEPLOY_DIR, REMOTE_PATH)
     sys.stderr.write('deploy to >>> %s\n' % REMOTE_PATH)
     ret = subprocess.call(cmd, shell=True)
