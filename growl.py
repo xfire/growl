@@ -72,9 +72,9 @@ def wrap(orig_func):
 
     # har, some funky python magic NOW!
 
-    @functools.wraps(orig_func)
     def outer(new_func):
 
+        @functools.wraps(orig_func)
         def wrapper(*args, **kwargs):
             return new_func(orig_func, *args, **kwargs)
 
