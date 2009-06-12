@@ -403,21 +403,19 @@ if __name__ == '__main__':
 
     base = deploy_path = None
     args = sys.argv[1:]
-    try:
-        if not args[-1].startswith('--'):
-            deploy_path = args.pop()
-    except IndexError:
-        pass
 
-    try:
-        if not args[-1].startswith('--'):
-            base = args.pop()
-        else:
-            raise IndexError
-    except IndexError:
-        if deploy_path:
-            base = deploy_path
-            deploy_path = os.path.join(base, '_deploy')
+    for arg in sys.argv[:0:-1]:
+        if not arg.startswith('-'):
+            if not deploy_path:
+                deploy_path = arg
+            elif not base:
+                base = arg
+        elif arg == '--':
+            break
+
+    if not base and deploy_path:
+        base = deploy_path
+        deploy_path = os.path.join(base, '_deploy')
 
     if base and os.path.isdir(base):
         Config.updateconfig(base, deploy_path)
