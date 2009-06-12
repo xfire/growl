@@ -299,21 +299,22 @@ class Site(Config):
                 if f.endswith('.py'):
                     execfile(os.path.join(self.HOOK_DIR, f), globals())
 
-    def read(self):
-        """ read all layouts.
+    def prepare(self):
+        """ read all layouts
         """
         self.read_layouts()
 
-    def generate(self):
-        """ write all posts and then the site content to the deploy directory.
+    def run(self):
+        """ generate the site content to the deploy directory.
         """
         self.write_site_content()
 
-    def deploy(self):
-        """ empty deply function which can be used by hooks to deploy the
-            generated site. e.g. rsync to the webserver, ...
-        """
-        pass
+        if options.serve != None:
+            try:
+                port = int(options.serve)
+                site.serve(port)
+            except ValueError:
+                print 'Invalid Port: %s' % options.serve
 
     def read_layouts(self):
         if os.path.isdir(self.LAYOUT_DIR):
@@ -452,10 +453,6 @@ if __name__ == '__main__':
         pass
 
     site.options = options
-    site.read()
-    site.generate()
-    site.deploy()
 
-    if options.serve != None:
-        port = int(options.serve)
-        site.serve(port)
+    site.prepare()
+    site.run()
