@@ -18,13 +18,8 @@
 #
 
 import os
-import time
 import datetime
-import tempfile
-import textwrap
-import readline
-import urllib
-import sha
+
 
 class Post(Page):
     """ a post template mapping a single post from the _posts/
@@ -84,12 +79,13 @@ class Post(Page):
                 self.posts = [Post(os.path.join(self.POST_DIR, f),
                                    self.layouts,
                                    self.context)
-                                  for f in self.ignoreFilter(os.listdir(
-                                                                self.POST_DIR))]
+                              for f in self.ignoreFilter(os.listdir(
+                                                         self.POST_DIR))]
                 self.context.site.posts = sorted(p for p in self.posts
                                                     if p.publish)
-                self.context.site.unpublished_posts = sorted(p for p in self.posts
-                                                                if not p.publish)
+                self.context.site.unpublished_posts = sorted(p for
+                                                             p in self.posts
+                                                             if not p.publish)
 
         def calc_categories(self):
             self.categories = AttrDict()
@@ -105,115 +101,6 @@ class Post(Page):
             for p in self.posts:
                 p.write()
 
-# ----------------------------------------------------------------------------------------
-
-        def get_editor():
-            editor = os.environ.get('GROWL_EDITOR')
-            if not editor:
-                editor = os.environ.get('EDITOR')
-            if not editor:
-                editor = 'vi'
-            return editor
-
-        def launch_editor(content = ''):
-            fn = None
-            try:
-                fid, fn = tempfile.mkstemp('.post', 'growl_', None, True)
-                f = open(fn, 'w')
-                f.write(content)
-                f.close()
-
-                mod_time_start = os.stat(fn).st_mtime
-                rcode = subprocess.call([get_editor(), fn])
-                mod_time_end = os.stat(fn).st_mtime
-
-                hash_org = sha.new(content).digest()
-                f = open(fn, 'r')
-                content = f.read()
-                f.close()
-                hash_new = sha.new(content).digest()
-
-                if rcode != 0 or mod_time_end == mod_time_start or hash_org == hash_new:
-                    return None
-
-                # only delete temp file if anything went ok
-                return content
-            finally:
-                if fn:
-                    os.unlink(fn)
-
-        def raw_input_default(prompt, value = None):
-            if value:
-                readline.set_startup_hook(lambda: readline.insert_text(value))
-            try:
-                return raw_input(prompt)
-            finally:
-                if value:
-                    readline.set_startup_hook(None)
-
-        def mangle_url(url):
-            ou = url
-            url = url.lower()
-            url = ''.join(c for c in url if c not in mangle_url.SP)
-            url = url.replace('&', ' and ')
-            url = url.replace('.', ' dot ')
-            url = url.strip()
-            url = url.replace(' ', '_')
-            return urllib.quote(url)
-        mangle_url.SP = '`~!@#$%^*()+={}[]|\\;:\'",<>/?'
-
-        def create_new_post(self):
-            TEMPLATE = textwrap.dedent("""
-            ---
-            layout: post
-            title: ???
-            categories: ???
-            ---
-            """).strip()
-            try:
-                content = launch_editor(TEMPLATE)
-                if content:
-                    # load yaml header
-                    mo = Template.RE_YAML.match(content)
-                    if mo and mo.groupdict().get('yaml'):
-                        meta = yaml.load(mo.groupdict().get('yaml'))
-                        title = meta.get('title')
-
-                    if title:
-                        title = mangle_url(title)
-
-                        filename = time.strftime('%Y-%m-%d-', datetime.datetime.now().timetuple())
-                        filename += title
-
-                        try:
-                            filename = raw_input_default('filename: ', filename)
-                            filename = os.path.join(self.POST_DIR, filename)
-                            f = open(filename, 'w')
-                            f.write(content)
-                            f.close()
-                            print 'created post: %s' % filename
-                        except KeyboardInterrupt:
-                            # save backup to temp file
-                            print '\nabort...'
-                            fid, fn = tempfile.mkstemp('.post', 'growl_', None, True)
-                            f = open(fn, 'w')
-                            f.write(content)
-                            f.close()
-                else:
-                    print 'abort...'
-            except Exception, e:
-                print 'can\'t create new post: %s' % e
-
-        @wrap(clazz.setupOptions)
-        def setupOptions(forig, self, parser):
-            forig(self, parser)
-            parser.add_option('-n', '--newpost',
-                              action = 'store_true', dest = 'new_post',
-                              help = 'create new post')
-
-# ----------------------------------------------------------------------------------------
-
-
         @wrap(clazz.prepare)
         def site_prepare(forig, self):
             """ read all posts and calculate the categories.
@@ -221,16 +108,12 @@ class Post(Page):
             forig(self)
             read_posts(self)
             calc_categories(self)
-        
+
         @wrap(clazz.run)
         def site_run(forig, self):
             """ write all posts to the deploy directory.
             """
-            if self.options.new_post:
-                create_new_post(self)
-            else:
-                write_posts(self)
-                forig(self)
+            write_posts(self)
+            forig(self)
 
 Post.setup(Site) # whooha!
-
