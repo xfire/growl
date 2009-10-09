@@ -46,6 +46,7 @@ try:
     import jinja2
 
     def renderTemplate(template, context):
+        template = template.decode("utf8")
         return jinja2.Template(template).render(context)
 
     def templateFilter(func):
@@ -187,7 +188,7 @@ class Template(Config):
         if not os.path.isdir(dirname):
             os.makedirs(dirname)
         f = file(fname, 'w')
-        f.write(content)
+        f.write(content.encode("utf8"))
         f.close()
 
     def __getattr__(self, name):
@@ -236,6 +237,10 @@ class Page(Template):
     @property
     def url(self):
         return self.path.replace(os.path.sep, '/')
+    
+    @property
+    def root(self):
+        return "../" * self.url.count("/")
 
     @property
     def path(self):
