@@ -237,11 +237,15 @@ class Page(Template):
     @property
     def url(self):
         return self.path.replace(os.path.sep, '/')
+        
+    @property
+    def urlparts(self):
+        return self.url.split("/")
     
     @property
     def root(self):
         return "../" * self.url.count("/")
-
+        
     @property
     def path(self):
         path = os.path.abspath(self.filename)
