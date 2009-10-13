@@ -449,13 +449,13 @@ if __name__ == '__main__':
 
     try:
         import markdown
-        Config.transformers['markdown'] = markdown.markdown
+        Config.transformers.setdefault('markdown', markdown.markdown)
     except ImportError:
         pass
 
     try:
         import textile
-        Config.transformers['textile'] = textile.textile
+        Config.transformers.setdefault('textile', textile.textile)
     except ImportError:
         pass
 
