@@ -42,17 +42,20 @@ import yaml
 def renderTemplate(template, context):
     raise NotImplementedError('no template engine configured!')
 
+
 try:
     import jinja2
 
+    jinja2_env = jinja2.Environment()
+
     def renderTemplate(template, context):
         template = template.decode("utf8")
-        return jinja2.Template(template).render(context)
+        return jinja2_env.from_string(template).render(context)
 
     def templateFilter(func):
         """ decorator to easily create jinja2 filters
         """
-        jinja2.Template('').environment.filters[func.__name__] = func
+        jinja2_env.filters[func.__name__] = func
 except ImportError:
     pass
 
@@ -457,6 +460,12 @@ if __name__ == '__main__':
         import textile
         Config.transformers.setdefault('textile', textile.textile)
     except ImportError:
+        pass
+
+    try:
+        # set jinja2 loader to enable template inheritance
+        jinja2_env.loader = jinja2.FileSystemLoader(site.LAYOUT_DIR)
+    except NameError:
         pass
 
     site.options = options
