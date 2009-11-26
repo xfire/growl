@@ -3,7 +3,7 @@ growl - python based, easy extendable, blog aware, static site generator
 
 growl is a static website generator, which is heavily inspired from
 [jekyll](http://github.com/mojombo/jekyll/tree/master),
-and which shameless stole some really cool ideas from jekyll. 
+and which shamelessly stole some really cool ideas from jekyll. 
 
 nevertheless growl brings some nice features:
 
@@ -26,7 +26,7 @@ the following basic packages are needed:
 
 all other is optional depending on you own needs.
 
-I recommend to use [jinja2][jinja2] as templating engine. growl will 
+I recommend using [jinja2][jinja2] as the templating engine. growl will 
 use [jinja2][jinja2] as default, if it is installed.
 
     > apt-get install python-jinja2
@@ -52,7 +52,7 @@ simply call `growl.py` with the source directory:
     > growl.py my.site
 
 growl will then generate the output in the directory `my.site/_deploy`.
-if you want grow to spit the generated stuff into another directory,
+if you want growl to spit the generated stuff into another directory,
 simply specify this director as second parameter.
 
     > growl.py my.site /tmp/my.site.output
@@ -66,7 +66,7 @@ simply specify this director as second parameter.
 
 * `--deploy`
 
-  trigger deploy process. this do nothing per default, but you can
+  trigger deploy process. this does nothing per default, but you can
   add actions using hooks. (see `_hooks/deploy_rsync.py`)
 
 
@@ -77,8 +77,8 @@ growl will ignore all files and directories which starts with
 a `.` or a `_`. (this can be changed via `Site.IGNORE`, see
 [extending growl](#extending_growl))
 
-all files ending with `_` or an transformer extension (`Config.transformers`)
-are processed as **pages**. in that cases, the ending will be striped from
+all files ending with `_` or a transformer extension (`Config.transformers`)
+are processed as **pages**. in these cases, the ending will be striped from
 the filename. 
 
 e.g.
@@ -87,7 +87,7 @@ e.g.
 * `atom.xml_`  ->  `atom.xml`
 * `somefile.txt.markdown`  ->  `somefile.txt`
 
-some directories begining with an `_` are special to growl:
+some directories beginning with an `_` are special to growl:
 
 * `_deploy/` the default deploy directory
 * `_layout/` contains your site layouts
@@ -105,7 +105,7 @@ header must begin and end with a line containing 3 hyphen. e.g.
     ---
 
 all data defined in this header will be attached to the corresponding object
-and can so accessed in your template code. an example in [jinja2][jinja2] may
+and can be accessed in your template code. an example in [jinja2][jinja2] may
 look like
 
     <ul>
@@ -202,11 +202,11 @@ growl is very easy extendable via python code placed in the `_hooks` and
 `_libs` directory.
 
 if the `_libs` directory exists, it is added to the python module search path
-(`sys.path`). so python modules droped there, will be available in the code.
+(`sys.path`), so python modules dropped there will be available in the code.
 
 all files in the `_hooks` directory, which ends with `.py`, are executed
 directly in the global scope of the growl.py file. thus a hook can freely
-shape growls code at will. growl love that! ;)
+shape growls code at will. growl loves that! ;)
 
 here are some examples of what can be done. but you sure can imagine other
 cool things.
@@ -220,7 +220,7 @@ cool things.
 
 new transformers can be registered in the `Config` class by adding a
 filename extension <-> transformation function mapping to the `transformers`
-attribute. here an example for markdown2:
+attribute. here's an example for markdown2:
 
     import markdown2
     import functools
@@ -241,7 +241,7 @@ module as you see in the example above.
 
 growl decides to ignore files which filenames start with one of the tokens 
 defined in `Site.IGNORE`. so a hook with the following content will make
-growl to ignore all files begining with `.`, `_` and `foo`.
+growl ignore all files begining with `.`, `_` and `foo`.
 
     Site.IGNORE += ('foo',)
 
@@ -271,8 +271,8 @@ following content:
         print 'post: %s - %s\n' % (self.date.strftime('%Y-%m-%d'), self.title)
         return forig(self)
 
-grows offers the helper decorator `wrap`, which wrap an existing method
-of a class with a new one. the original method, is given to your new function
+growl offers the helper decorator `wrap`, which wraps an existing method
+of a class with a new one. the original method is given to your new function
 as the first parameter (`forig`).
 
 
