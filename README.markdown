@@ -18,7 +18,7 @@ is also available on github.
 installation
 ------------
 
-### requisites
+### prequisites
 
 the following basic packages are needed:
 
@@ -63,6 +63,8 @@ simply specify this director as second parameter.
 
   generate the site to the deploy directory and then start a simple
   webserver. this is intended to be used for testing purposes only.
+
+	> growl.py my.site --serve 1234
 
 * `--deploy`
 
@@ -194,7 +196,7 @@ this holds the site wide informations.
   the transformed content. no layouts are applied here.
 
 
-<a name="extending_growl"/>
+<a name="extending_growl"></a>
 extending growl
 ---------------
 

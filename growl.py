@@ -372,7 +372,7 @@ class Site(Config):
                     shutil.copy(os.path.join(root, f), os.path.join(path, f))
 
     def serve(self, port):
-        """ serve the deploy directory with an very simple, cgi
+        """ serve the deploy directory with a very simple, cgi
             capable web server on 0.0.0.0:<port>.
         """
         from BaseHTTPServer import HTTPServer
