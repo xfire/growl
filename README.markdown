@@ -3,7 +3,7 @@ growl - python based, easy extendable, blog aware, static site generator
 
 growl is a static website generator, which is heavily inspired from
 [jekyll](http://github.com/mojombo/jekyll/tree/master),
-and which shamelessly stole some really cool ideas from jekyll. 
+and which shamelessly stole some really cool ideas from jekyll.
 
 nevertheless growl brings some nice features:
 
@@ -26,7 +26,7 @@ the following basic packages are needed:
 
 all other is optional depending on you own needs.
 
-I recommend using [jinja2][jinja2] as the templating engine. growl will 
+I recommend using [jinja2][jinja2] as the templating engine. growl will
 use [jinja2][jinja2] as default, if it is installed.
 
     > apt-get install python-jinja2
@@ -64,7 +64,7 @@ simply specify this director as second parameter.
   generate the site to the deploy directory and then start a simple
   webserver. this is intended to be used for testing purposes only.
 
-	> growl.py my.site --serve 1234
+	> growl.py --serve 1234 my.site
 
 * `--deploy`
 
@@ -81,7 +81,7 @@ a `.` or a `_`. (this can be changed via `Site.IGNORE`, see
 
 all files ending with `_` or a transformer extension (`Config.transformers`)
 are processed as **pages**. in these cases, the ending will be striped from
-the filename. 
+the filename.
 
 e.g.
 
@@ -241,7 +241,7 @@ module as you see in the example above.
 
 ### change which files will be ignored
 
-growl decides to ignore files which filenames start with one of the tokens 
+growl decides to ignore files which filenames start with one of the tokens
 defined in `Site.IGNORE`. so a hook with the following content will make
 growl ignore all files begining with `.`, `_` and `foo`.
 
