@@ -117,6 +117,7 @@ class Config(object):
         cls.HOOK_DIR = os.path.join(base, '_hooks')
         cls.LIB_DIR = os.path.join(base, '_libs')
         cls.POST_FILE_EXT = '.html'
+        cls.ARTICLE_FILE_EXT = '.html'
 
 
 class Template(Config):
@@ -240,15 +241,15 @@ class Page(Template):
     @property
     def url(self):
         return self.path.replace(os.path.sep, '/')
-        
+
     @property
     def urlparts(self):
         return self.url.split("/")
-    
+
     @property
     def root(self):
         return "../" * self.url.count("/")
-        
+
     @property
     def path(self):
         path = os.path.abspath(self.filename)
@@ -323,6 +324,7 @@ class Site(Config):
 
         if options.serve != None:
             try:
+                options.serve = (options.serve).strip('-')
                 port = int(options.serve)
                 site.serve(port)
             except ValueError:

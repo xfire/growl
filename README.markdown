@@ -64,7 +64,7 @@ simply specify this director as second parameter.
   generate the site to the deploy directory and then start a simple
   webserver. this is intended to be used for testing purposes only.
 
-	> growl.py --serve 1234 my.site
+	> growl.py --serve -1234 my.site
 
 * `--deploy`
 
