@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # vim:syntax=python:sw=4:ts=4:expandtab
 #
@@ -38,6 +39,8 @@ from optparse import OptionParser
 
 import yaml
 
+reload(sys)
+sys.setdefaultencoding("utf-8")
 
 def renderTemplate(template, context):
     raise NotImplementedError('no template engine configured!')
