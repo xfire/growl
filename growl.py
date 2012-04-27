@@ -19,8 +19,10 @@
 # MA 02110-1301, USA.
 #
 
+#TODO get all file extesions of non-ignored file types and pass to files_changed correctly!
+
 __author__ = 'Rico Schiekel <fire@downgra.de>'
-__copyright__ = 'Copyright (C) 2009 Rico Schiekel'
+__copyright__ = 'Copyright (C) 2012 Rico Schiekel'
 __license__ = 'GPLv2'
 __version__ = '0.3'
 
@@ -30,6 +32,7 @@ import sys
 import re
 import shutil
 import datetime
+import time
 import collections
 import itertools
 import functools
@@ -399,6 +402,39 @@ class Site(Config):
             return True
         return itertools.ifilter(ignore_filter, seq)
 
+    def files_changed(self, path, extensions):
+        """ return true if the files have changed since the last check
+        """
+        def file_times(path):
+            """ return the last time files have been modified
+            """
+            for root, dirs, files in os.walk(path):
+                dirs[:] = [x for x in dirs if x[0] != '.']
+                for file in files:
+                    if any(file.endswith(ext) for ext in extensions):
+                        try:
+                            yield os.stat(os.path.join(root, file)).st_mtime
+                        except:
+                            yield None
+
+        global LAST_MTIME
+        mtime = max(file_times(path))
+        if mtime > LAST_MTIME:
+            LAST_MTIME = mtime
+            return True
+        return False
+
+    def get_extensions(self, path):
+        """ get all filename extensions
+        """
+        exts = []
+        for root, dirs, files in os.walk(path):
+            dirs[:] = [x for x in dirs if x[0] != '.']
+            for file in files:
+                ext = os.path.splitext(file)[-1][1:]
+                exts.append(ext)
+        return set(exts)
+
     def setupOptions(self, parser):
         parser.add_option('--serve',
                           action = 'store', dest = 'serve',
@@ -409,10 +445,15 @@ class Site(Config):
         parser.add_option('-v', '--version',
                           action = 'store_true', dest = 'version',
                           help = 'Output version information and exit')
+        parser.add_option('-r', '--autoreload',
+                          action = 'store_true', dest = 'autoreload',
+                          help = 'Relaunch Growl each time a modification'
+                                 ' occurs on the content files.')
 
 
 if __name__ == '__main__':
     DEFAULT_PORT = 8080
+    LAST_MTIME = 0
     parser = OptionParser(usage = 'syntax: %prog [options] <from> [to]')
 
     base = deploy_path = None
@@ -472,5 +513,18 @@ if __name__ == '__main__':
 
     site.options = options
 
-    site.prepare()
-    site.run()
+    extensions = ('md2','md')
+    # extensions = site.get_extensions(base)
+
+    if options.autoreload:
+        while True:
+            try:
+                if site.files_changed(base, extensions):
+                    site.prepare()
+                    site.run()
+                time.sleep(1)
+            except KeyboardInterrupt:
+                break
+    else:
+        site.prepare()
+        site.run()
