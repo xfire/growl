@@ -2,7 +2,7 @@
 #
 # vim:syntax=python:sw=4:ts=4:expandtab
 #
-# Copyright (C) 2009 Rico Schiekel (fire at downgra dot de)
+# Copyright (C) 2012 Rico Schiekel (fire at downgra dot de)
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License version 2
@@ -409,7 +409,7 @@ class Site(Config):
             """ return the last time files have been modified
             """
             for root, dirs, files in os.walk(path):
-                dirs[:] = [x for x in dirs if x[0] != '.']
+                dirs[:] = [x for x in dirs if x[0] != '.' and x != '_deploy']
                 for file in files:
                     if any(file.endswith(ext) for ext in extensions):
                         try:
@@ -425,11 +425,11 @@ class Site(Config):
         return False
 
     def get_extensions(self, path):
-        """ get all filename extensions
+        """ get all filename extensions and ignore the `_deploy` directory
         """
         exts = []
         for root, dirs, files in os.walk(path):
-            dirs[:] = [x for x in dirs if x[0] != '.']
+            dirs[:] = [x for x in dirs if x[0] != '.' and x != '_deploy']
             for file in files:
                 ext = os.path.splitext(file)[-1][1:]
                 exts.append(ext)
@@ -513,8 +513,7 @@ if __name__ == '__main__':
 
     site.options = options
 
-    extensions = ('md2','md')
-    # extensions = site.get_extensions(base)
+    extensions = site.get_extensions(base)
 
     if options.autoreload:
         while True:
