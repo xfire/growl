@@ -71,6 +71,25 @@ simply specify this director as second parameter.
   trigger deploy process. this does nothing per default, but you can
   add actions using hooks. (see `_hooks/deploy_rsync.py`)
 
+* `--autoreload` or `-r`
+
+  relaunch growl each time a modification occurs on the content files.
+  (*Please note*: you will be unable to use Growl's built-in webserver
+  when you use --autoreload.  To see your changes in the browser,
+  simply navigate to your `_deploy` directory and open up a new
+  terminal instance and use Python's built-in webserver in conjunction
+  with Growl.)
+
+	> growl.py -r my.site
+
+  then, in a new terminal window:
+
+    > cd my.site/_deploy/
+
+    > python -m SimpleHTTPServer
+
+  and point your browser to 0.0.0.0:8000.
+
 
 input data
 ----------
@@ -297,4 +316,3 @@ license
   [mako]:    http://www.makotemplates.org/      "mako"
   [cheetah]: http://www.cheetahtemplate.org/    "cheetah"
   [yaml]:    http://www.yaml.org/               "yaml"
-
