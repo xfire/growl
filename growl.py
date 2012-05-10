@@ -2,7 +2,7 @@
 #
 # vim:syntax=python:sw=4:ts=4:expandtab
 #
-# Copyright (C) 2009 Rico Schiekel (fire at downgra dot de)
+# Copyright (C) 2012 Rico Schiekel (fire at downgra dot de)
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License version 2
@@ -20,7 +20,7 @@
 #
 
 __author__ = 'Rico Schiekel <fire@downgra.de>'
-__copyright__ = 'Copyright (C) 2009 Rico Schiekel'
+__copyright__ = 'Copyright (C) 2012 Rico Schiekel'
 __license__ = 'GPLv2'
 __version__ = '0.3'
 
@@ -30,6 +30,7 @@ import sys
 import re
 import shutil
 import datetime
+import time
 import collections
 import itertools
 import functools
@@ -117,6 +118,7 @@ class Config(object):
         cls.HOOK_DIR = os.path.join(base, '_hooks')
         cls.LIB_DIR = os.path.join(base, '_libs')
         cls.POST_FILE_EXT = '.html'
+        cls.ARTICLE_FILE_EXT = '.html'
 
 
 class Template(Config):
@@ -240,15 +242,15 @@ class Page(Template):
     @property
     def url(self):
         return self.path.replace(os.path.sep, '/')
-        
+
     @property
     def urlparts(self):
         return self.url.split("/")
-    
+
     @property
     def root(self):
         return "../" * self.url.count("/")
-        
+
     @property
     def path(self):
         path = os.path.abspath(self.filename)
@@ -323,6 +325,7 @@ class Site(Config):
 
         if options.serve != None:
             try:
+                options.serve = (options.serve).strip('-')
                 port = int(options.serve)
                 site.serve(port)
             except ValueError:
@@ -397,6 +400,39 @@ class Site(Config):
             return True
         return itertools.ifilter(ignore_filter, seq)
 
+    def files_changed(self, path, extensions):
+        """ return true if the files have changed since the last check
+        """
+        def file_times(path):
+            """ return the last time files have been modified
+            """
+            for root, dirs, files in os.walk(path):
+                dirs[:] = [x for x in dirs if x[0] != '.' and x != '_deploy']
+                for file in files:
+                    if any(file.endswith(ext) for ext in extensions):
+                        try:
+                            yield os.stat(os.path.join(root, file)).st_mtime
+                        except:
+                            yield None
+
+        global LAST_MTIME
+        mtime = max(file_times(path))
+        if mtime > LAST_MTIME:
+            LAST_MTIME = mtime
+            return True
+        return False
+
+    def get_extensions(self, path):
+        """ get all filename extensions and ignore the `_deploy` directory
+        """
+        exts = []
+        for root, dirs, files in os.walk(path):
+            dirs[:] = [x for x in dirs if x[0] != '.' and x != '_deploy']
+            for file in files:
+                ext = os.path.splitext(file)[-1][1:]
+                exts.append(ext)
+        return set(exts)
+
     def setupOptions(self, parser):
         parser.add_option('--serve',
                           action = 'store', dest = 'serve',
@@ -407,10 +443,15 @@ class Site(Config):
         parser.add_option('-v', '--version',
                           action = 'store_true', dest = 'version',
                           help = 'Output version information and exit')
+        parser.add_option('-r', '--autoreload',
+                          action = 'store_true', dest = 'autoreload',
+                          help = 'Relaunch Growl each time a modification'
+                                 ' occurs on the content files.')
 
 
 if __name__ == '__main__':
     DEFAULT_PORT = 8080
+    LAST_MTIME = 0
     parser = OptionParser(usage = 'syntax: %prog [options] <from> [to]')
 
     base = deploy_path = None
@@ -470,5 +511,17 @@ if __name__ == '__main__':
 
     site.options = options
 
-    site.prepare()
-    site.run()
+    extensions = site.get_extensions(base)
+
+    if options.autoreload:
+        while True:
+            try:
+                if site.files_changed(base, extensions):
+                    site.prepare()
+                    site.run()
+                time.sleep(1)
+            except KeyboardInterrupt:
+                break
+    else:
+        site.prepare()
+        site.run()
