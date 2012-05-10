@@ -19,8 +19,6 @@
 # MA 02110-1301, USA.
 #
 
-#TODO get all file extesions of non-ignored file types and pass to files_changed correctly!
-
 __author__ = 'Rico Schiekel <fire@downgra.de>'
 __copyright__ = 'Copyright (C) 2012 Rico Schiekel'
 __license__ = 'GPLv2'
